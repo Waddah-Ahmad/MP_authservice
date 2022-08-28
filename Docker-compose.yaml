@@ -1,0 +1,37 @@
+version: '3.9'
+services:
+  user:
+    build: 
+      context: .
+      dockerfile: Dockerfile.prod
+    environment:
+      - DJANGO_SECRET_KEY=django-insecure-_zk=9yl=ul!po@_z-)wq&x4=&!(ons2(pogyu52+f7f37v3j$y
+      - EMAIL_USER=waddah.20121999@gmail.com
+      - EMAIL_PASS=kfgzqalucyeodtrq
+      - EMAIL_FROM=waddah.20121999@gmail.com
+      - JWT_SECTET_KEY=yigayiwgowahawjjopawj
+    #command: bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:9000"
+    #command: python manage.py runserver 0.0.0.0:9000
+    command: gunicorn djangoauthapi1.wsgi:application --log-level=debug --bind 0.0.0.0:9000
+    ports:
+      - "9000:9000"
+    depends_on:
+      - db
+
+  db:
+    restart: always
+    image: postgres:latest
+    
+    ports:
+      - 5432:5432
+    environment:
+    - POSTGRES_NAME=postgres
+    - POSTGRES_USER=postgres # The PostgreSQL user (useful to connect to the database)
+    - POSTGRES_PASSWORD=postgres # The PostgreSQL password (useful to connect to the database)
+    - POSTGRES_DB=postgres # The PostgreSQL default database 
+      
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+  
+      
+
