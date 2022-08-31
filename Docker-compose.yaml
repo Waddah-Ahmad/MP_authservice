@@ -10,9 +10,13 @@ services:
       - EMAIL_PASS=kfgzqalucyeodtrq
       - EMAIL_FROM=waddah.20121999@gmail.com
       - JWT_SECTET_KEY=yigayiwgowahawjjopawj
-    #command: bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:9000"
+      - POSTGRES_NAME=postgres
+      - POSTGRES_USER=postgres # The PostgreSQL user (useful to connect to the database)
+      - POSTGRES_PASSWORD=postgres # The PostgreSQL password (useful to connect to the database)
+      - POSTGRES_DB=postgres
+    command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:9000"
     #command: python manage.py runserver 0.0.0.0:9000
-    command: gunicorn djangoauthapi1.wsgi:application --log-level=debug --bind 0.0.0.0:9000
+    #command: gunicorn djangoauthapi1.wsgi:application --log-level=debug --bind 0.0.0.0:9000
     ports:
       - "9000:9000"
     depends_on:
@@ -32,6 +36,3 @@ services:
       
     volumes:
       - ./data/db:/var/lib/postgresql/data
-  
-      
-
