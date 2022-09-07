@@ -3,10 +3,10 @@ from lib2to3.pgen2 import token
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
-from account.serializers import SendPasswordResetEmailSerializer, UserChangePasswordSerializer, UserLoginSerializer, UserPasswordResetSerializer, UserProfileSerializer, UserRegistrationSerializer 
+from account.serializers import AddStreamer, SendPasswordResetEmailSerializer, UserChangePasswordSerializer, UserLoginSerializer, UserPasswordResetSerializer, UserProfileSerializer, UserRegistrationSerializer 
 from django.contrib.auth import authenticate
 from account.renderers import UserRenderer
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated , IsAdminUser
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -16,7 +16,9 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         token = super().get_token(user)
         token['is_admin'] = user.is_admin
         token['email'] = user.email
+        token['is_streamer'] = user.is_streamer
         return token
+
 
 
 def get_tokens_for_user(user):
@@ -25,6 +27,16 @@ def get_tokens_for_user(user):
         'refresh': str(refresh),
         'access': str(refresh.access_token),
     }
+
+class AddStreamerView(APIView):
+  renderer_classes = [UserRenderer]
+  permission_classes = [IsAdminUser]
+  def post(self, request, format=None):
+    serializer = AddStreamer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    user = serializer.save()
+
+    return Response("Streamer Added Sucessfully..." , status=status.HTTP_201_CREATED)
 
 
 
