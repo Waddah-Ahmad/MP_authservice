@@ -6,7 +6,7 @@ from rest_framework.views import APIView
 from account.serializers import AddStreamer, SendPasswordResetEmailSerializer, UserChangePasswordSerializer, UserLoginSerializer, UserPasswordResetSerializer, UserProfileSerializer, UserRegistrationSerializer 
 from django.contrib.auth import authenticate
 from account.renderers import UserRenderer
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated , IsAdminUser
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -30,14 +30,12 @@ def get_tokens_for_user(user):
 
 class AddStreamerView(APIView):
   renderer_classes = [UserRenderer]
-
+  permission_classes = [IsAdminUser]
   def post(self, request, format=None):
     serializer = AddStreamer(data=request.data)
     serializer.is_valid(raise_exception=True)
     user = serializer.save()
-    #token = get_tokens_for_user(user)
-    # print(token)
-    #return Response(token, status=status.HTTP_201_CREATED)
+
     return Response("Streamer Added Sucessfully..." , status=status.HTTP_201_CREATED)
 
 
