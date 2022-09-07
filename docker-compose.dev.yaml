@@ -6,6 +6,7 @@ services:
       dockerfile: Dockerfile.prod
     
     environment:
+      - DJANGO_SETTINGS=dev
       - DJANGO_SECRET_KEY=django-insecure-_zk=9yl=ul!po@_z-)wq&x4=&!(ons2(pogyu52+f7f37v3j$y
       - EMAIL_USER=waddah.20121999@gmail.com
       - EMAIL_PASS=kfgzqalucyeodtrq
