@@ -20,17 +20,20 @@ class UserManager(BaseUserManager):
       user.save(using=self._db)
       return user
 
-  def create_superuser(self, email, name, tc, password=None):
+  def create_streamer(self, email, name, tc, password=None, password2=None):
       """
       Creates and saves a superuser with the given email, name, tc and password.
       """
-      user = self.create_user(
-          email,
-          password=password,
+      if not email:
+          raise ValueError('User must have an email address')
+      user = self.model(
+          email=self.normalize_email(email),
           name=name,
           tc=tc,
       )
-      user.is_admin = True
+      user.set_password(password)
+      user.is_admin = False
+      user.is_streamer=True
       user.save(using=self._db)
       return user
 
@@ -45,6 +48,7 @@ class User(AbstractBaseUser):
   tc = models.BooleanField()
   is_active = models.BooleanField(default=True)
   is_admin = models.BooleanField(default=False)
+  is_streamer = models.BooleanField(default=False)
   created_at = models.DateTimeField(auto_now_add=True)
   updated_at = models.DateTimeField(auto_now=True)
 
