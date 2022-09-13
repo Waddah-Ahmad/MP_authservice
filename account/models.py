@@ -1,5 +1,6 @@
 from django.db import models
-from django.contrib.auth.models import BaseUserManager,AbstractBaseUser
+from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
+
 
 #  Custom User Manager
 class UserManager(BaseUserManager):
@@ -19,6 +20,7 @@ class UserManager(BaseUserManager):
       user.set_password(password)
       user.save(using=self._db)
       return user
+
   def create_superuser(self, email, name, tc, password=None):
     """
     Creates and saves a superuser with the given email, name, tc and password.
@@ -33,6 +35,7 @@ class UserManager(BaseUserManager):
     user.is_streamer = True
     user.save(using=self._db)
     return user
+
   def create_streamer(self, email, name, tc, password=None, password2=None):
       """
       Creates and saves a superuser with the given email, name, tc and password.
@@ -46,9 +49,10 @@ class UserManager(BaseUserManager):
       )
       user.set_password(password)
       user.is_admin = False
-      user.is_streamer=True
+      user.is_streamer = True
       user.save(using=self._db)
       return user
+
 
 #  Custom User Model
 class User(AbstractBaseUser):
@@ -88,6 +92,7 @@ class User(AbstractBaseUser):
       "Is the user a member of staff?"
       # Simplest possible answer: All admins are staff
       return self.is_admin
+
 
 
 
