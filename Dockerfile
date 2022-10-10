@@ -23,10 +23,8 @@ RUN pip install -r requirements.txt
 
 # copy project
 COPY . .
-RUN chmod +x ./entrypoint.sh
-
-EXPOSE 9000
+RUN chmod +x ./entrypoint.prod.sh
 
 
-ENTRYPOINT ["/usr/src/app/entrypoint.sh"]
+ENTRYPOINT ["/usr/src/app/entrypoint.prod.sh"]
 

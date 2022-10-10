@@ -3,37 +3,45 @@ services:
   user:
     build: 
       context: .
-      dockerfile: Dockerfile.prod
-    
+      dockerfile: Dockerfile
     environment:
-      - DJANGO_SECRET_KEY=django-insecure-_zk=9yl=ul!po@_z-)wq&x4=&!(ons2(pogyu52+f7f37v3j$y
-      - EMAIL_USER=waddah.20121999@gmail.com
-      - EMAIL_PASS=kfgzqalucyeodtrq
-      - EMAIL_FROM=waddah.20121999@gmail.com
-      - JWT_SECTET_KEY=yigayiwgowahawjjopawj
-      - POSTGRES_NAME=postgres
-      - POSTGRES_USER=postgres # The PostgreSQL user (useful to connect to the database)
-      - POSTGRES_PASSWORD=postgres # The PostgreSQL password (useful to connect to the database)
-      - POSTGRES_DB=postgres
-    command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:9000"
-    #command: python manage.py runserver 0.0.0.0:9000
+      - DJANGO_SETTINGS=
+      - DJANGO_SECRET_KEY=
+      - DJANGO_ALLOWED_HOSTS=
+      - DJANGO_CORS_ORIGIN_WHITELIST=
+      - EMAIL_USER=
+      - EMAIL_PASS=
+      - EMAIL_FROM=
+      - JWT_ISSUER=
+      - DB_ENGINE=
+      - DB_NAME=
+      - DB_USER= # The PostgreSQL user (useful to connect to the database)
+      - DB_PASSWORD= # The PostgreSQL password (useful to connect to the database)
+      - DB_HOST=
+      - DB_PORT=
+      - JWT_SECRET_KEY=|- -----BEGIN RSA PRIVATE KEY-----  -----END RSA PRIVATE KEY-----
+      - JWT_VERIFYING_KEY=|- -----BEGIN PUBLIC KEY----- -----END PUBLIC KEY-----
+      - DJANGO_SUPERUSER_EMAIL=
+      - DJANGO_SUPERUSER_USERNAME=
+      - DJANGO_SUPERUSER_PASSWORD=
+      - DJANGO_SUPERUSER_NAME=
+    command: sh -c " python manage.py runserver 0.0.0.0:9000"
     #command: gunicorn djangoauthapi1.wsgi:application --log-level=debug --bind 0.0.0.0:9000
     ports:
       - "9000:9000"
     depends_on:
-      - db
+      - auth_db
 
-  db:
+  auth_db:
     restart: always
     image: postgres:latest
     
     ports:
       - 5432:5432
     environment:
-    - POSTGRES_NAME=postgres
-    - POSTGRES_USER=postgres # The PostgreSQL user (useful to connect to the database)
-    - POSTGRES_PASSWORD=postgres # The PostgreSQL password (useful to connect to the database)
-    - POSTGRES_DB=postgres # The PostgreSQL default database 
+    - POSTGRES_USER= # The PostgreSQL user (useful to connect to the database)
+    - POSTGRES_PASSWORD= # The PostgreSQL password (useful to connect to the database)
+    - POSTGRES_DB= # The PostgreSQL default database 
       
     volumes:
       - ./data/db:/var/lib/postgresql/data
