@@ -1,5 +1,6 @@
 import json
 from lib2to3.pgen2 import token
+from tokenize import group
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
@@ -18,13 +19,14 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         token['is_admin'] = user.is_admin
         token['email'] = user.email
         token['is_streamer'] = user.is_streamer
+        token['group'] = user.group
         return token
 
 
 def get_tokens_for_user(user):
     refresh = CustomTokenObtainPairSerializer.get_token(user)
     return {
-        'refresh': str(refresh),
+        # 'refresh': str(refresh),
         'access': str(refresh.access_token),
     }
 
@@ -49,7 +51,7 @@ class UserRegistrationView(APIView):
     serializer.is_valid(raise_exception=True)
     user = serializer.save()
     token = get_tokens_for_user(user)
-    return Response(token, status=status.HTTP_201_CREATED)
+    return Response({'token':token['access'],'msg':'Registered'}, status=status.HTTP_201_CREATED)
 
 
 class UserLoginView(APIView):
@@ -67,6 +69,46 @@ class UserLoginView(APIView):
     else:
       return Response({'errors': {'non_field_errors': ['Email or Password is not Valid']}}, status=status.HTTP_404_NOT_FOUND)
 
+class AdminLoginView(APIView):
+  renderer_classes = [UserRenderer]
+
+  def post(self, request, format=None):
+    serializer = UserLoginSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    email = serializer.data.get('email')
+    password = serializer.data.get('password')
+    group = serializer.data.get('group')
+    user = authenticate(email=email, password=password,group=group)
+    if user is not None:
+      # if group !="user":
+          if (group =="admin" or user.is_admin): 
+            token = get_tokens_for_user(user)
+            return Response({'token': token['access'], 'msg': 'Password '}, status=status.HTTP_200_OK)
+          else:
+            return Response({'errors': {'non_field_errors': ['Not admin']}}, status=status.HTTP_403_FORBIDDEN)
+      # else:
+      #   return Response({'errors': {'non_field_errors': ['Email or Password is not Valid']}}, status=status.HTTP_404_NOT_FOUND)
+    else:
+      return Response({'errors': {'non_field_errors': ['Email or Password is not Valid']}}, status=status.HTTP_404_NOT_FOUND)
+
+class StreamerLoginView(APIView):
+  renderer_classes = [UserRenderer]
+
+  def post(self, request, format=None):
+    serializer = UserLoginSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    email = serializer.data.get('email')
+    password = serializer.data.get('password')
+    group = serializer.data.get('group')
+    user = authenticate(email=email, password=password,group=group)
+    if user is not None:
+        if (group =="streamer" or user.is_streamer): 
+          token = get_tokens_for_user(user)
+          return Response({'token': token['access'], 'msg': 'Password '}, status=status.HTTP_200_OK)
+        else:
+          return Response({'errors':{'non_field_errors':['Not Streamer']}},status=status.HTTP_403_FORBIDDEN)
+    else:
+      return Response({'errors': {'non_field_errors': ['Email or Password is not Valid']}}, status=status.HTTP_404_NOT_FOUND)
 
 class UserProfileView(APIView):
   renderer_classes = [UserRenderer]
