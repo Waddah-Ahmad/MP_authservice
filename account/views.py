@@ -18,6 +18,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         token['is_admin'] = user.is_admin
         token['email'] = user.email
         token['is_streamer'] = user.is_streamer
+        token['group'] = user.group
         return token
 
 
