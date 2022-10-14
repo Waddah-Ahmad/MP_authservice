@@ -12,7 +12,7 @@ class AddStreamer(serializers.ModelSerializer):
 
   class Meta:
     model = User
-    fields = ['email', 'name', 'password', 'password2', 'tc']
+    fields = ['email', 'name', 'password', 'password2']
 
   def validate(self, attrs):
     password = attrs.get('password')
@@ -31,7 +31,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
   class Meta:
     model = User
-    fields = ['email', 'name', 'password', 'password2', 'tc']
+    fields = ['email', 'name', 'password', 'password2']
     extra_kwargs = {
       'password': {'write_only': True}
     }

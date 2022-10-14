@@ -1,5 +1,6 @@
 import json
 from lib2to3.pgen2 import token
+from tokenize import group
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
@@ -8,6 +9,7 @@ from django.contrib.auth import authenticate
 from account.renderers import UserRenderer
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.tokens import RefreshToken,BlacklistedToken,OutstandingToken,AccessToken
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -18,6 +20,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         token['is_admin'] = user.is_admin
         token['email'] = user.email
         token['is_streamer'] = user.is_streamer
+        token['group'] = user.group
         return token
 
 
@@ -49,7 +52,7 @@ class UserRegistrationView(APIView):
     serializer.is_valid(raise_exception=True)
     user = serializer.save()
     token = get_tokens_for_user(user)
-    return Response(token, status=status.HTTP_201_CREATED)
+    return Response({'token':token['access'],'msg':'Registered'}, status=status.HTTP_201_CREATED)
 
 
 class UserLoginView(APIView):
@@ -63,10 +66,50 @@ class UserLoginView(APIView):
     user = authenticate(email=email, password=password)
     if user is not None:
       token = get_tokens_for_user(user)
-      return Response({'token': token['access'], 'msg': 'Password '}, status=status.HTTP_200_OK)
+      return Response({'token': token['access'],'refresh':token['refresh'], 'msg': 'Password '}, status=status.HTTP_200_OK)
     else:
       return Response({'errors': {'non_field_errors': ['Email or Password is not Valid']}}, status=status.HTTP_404_NOT_FOUND)
 
+class AdminLoginView(APIView):
+  renderer_classes = [UserRenderer]
+
+  def post(self, request, format=None):
+    serializer = UserLoginSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    email = serializer.data.get('email')
+    password = serializer.data.get('password')
+    group = serializer.data.get('group')
+    user = authenticate(email=email, password=password,group=group)
+    if user is not None:
+      # if group !="user":
+          if (group =="admin" or user.is_admin): 
+            token = get_tokens_for_user(user)
+            return Response({'token': token['access'], 'msg': 'Password '}, status=status.HTTP_200_OK)
+          else:
+            return Response({'errors': {'non_field_errors': ['Not admin']}}, status=status.HTTP_403_FORBIDDEN)
+      # else:
+      #   return Response({'errors': {'non_field_errors': ['Email or Password is not Valid']}}, status=status.HTTP_404_NOT_FOUND)
+    else:
+      return Response({'errors': {'non_field_errors': ['Email or Password is not Valid']}}, status=status.HTTP_404_NOT_FOUND)
+
+class StreamerLoginView(APIView):
+  renderer_classes = [UserRenderer]
+
+  def post(self, request, format=None):
+    serializer = UserLoginSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    email = serializer.data.get('email')
+    password = serializer.data.get('password')
+    group = serializer.data.get('group')
+    user = authenticate(email=email, password=password,group=group)
+    if user is not None:
+        if (group =="streamer" or user.is_streamer): 
+          token = get_tokens_for_user(user)
+          return Response({'token': token['access'], 'msg': 'Password '}, status=status.HTTP_200_OK)
+        else:
+          return Response({'errors':{'non_field_errors':['Not Streamer']}},status=status.HTTP_403_FORBIDDEN)
+    else:
+      return Response({'errors': {'non_field_errors': ['Email or Password is not Valid']}}, status=status.HTTP_404_NOT_FOUND)
 
 class UserProfileView(APIView):
   renderer_classes = [UserRenderer]
@@ -103,3 +146,26 @@ class UserPasswordResetView(APIView):
     serializer = UserPasswordResetSerializer(data=request.data, context={'uid': uid, 'token': token})
     serializer.is_valid(raise_exception=True)
     return Response({'msg': 'Password Reset Successfully'}, status=status.HTTP_200_OK)
+
+# class LogoutView(APIView):
+#     permission_classes = (IsAuthenticated,)
+
+#     def post(self, request):
+#         try:
+#             access_token = request.data["access"]
+#             token = AccessToken(access_token)
+#             token.blacklist()
+
+#             return Response({'msg':'Logged Out Successfully'},status=status.HTTP_205_RESET_CONTENT)
+#         except Exception as e:
+#             return Response({'msg':'Cannot Log Out'},status=status.HTTP_400_BAD_REQUEST)
+
+class LogoutAllView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        tokens = OutstandingToken.objects.filter(user_id=request.user.id)
+        for token in tokens:
+            t, _ = BlacklistedToken.objects.get_or_create(token=token)
+
+        return Response({'msg':'Logged out all'},status=status.HTTP_205_RESET_CONTENT)
