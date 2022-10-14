@@ -1,10 +1,13 @@
+from tokenize import group
 from django.db import models
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 
 
 #  Custom User Manager
 class UserManager(BaseUserManager):
-  def create_user(self, email, name ,password=None, password2=None):
+
+  def create_user(self, email, name, tc , password=None, password2=None):
+
       """
       Creates and saves a User with the given email, name and password.
       """
@@ -27,7 +30,12 @@ class UserManager(BaseUserManager):
         email,
         password=password,
         name=name,
+
+        tc=tc,
+        
+
     )
+    user.group = "admin"
     user.is_admin = True
     user.is_streamer = True
     user.group = "admin"
@@ -44,6 +52,7 @@ class UserManager(BaseUserManager):
           email=self.normalize_email(email),
           name=name,
       )
+      user.group = "streamer"
       user.set_password(password)
       user.is_admin = False
       user.is_streamer = True
@@ -66,10 +75,13 @@ class User(AbstractBaseUser):
   is_streamer = models.BooleanField(default=False)
   created_at = models.DateTimeField(auto_now_add=True)
   updated_at = models.DateTimeField(auto_now=True)
+
+  group= models.CharField(max_length=50, default="user")
+
   objects = UserManager()
 
   USERNAME_FIELD = 'email'
-  REQUIRED_FIELDS = ['name']
+  REQUIRED_FIELDS = ['name', 'tc' ]
 
   def __str__(self):
       return self.email
