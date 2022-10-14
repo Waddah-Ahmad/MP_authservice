@@ -5,9 +5,11 @@ from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 
 #  Custom User Manager
 class UserManager(BaseUserManager):
+
   def create_user(self, email, name, tc , password=None, password2=None):
+
       """
-      Creates and saves a User with the given email, name, tc and password.
+      Creates and saves a User with the given email, name and password.
       """
       if not email:
           raise ValueError('User must have an email address')
@@ -15,14 +17,12 @@ class UserManager(BaseUserManager):
       user = self.model(
           email=self.normalize_email(email),
           name=name,
-          tc=tc,
       )
-
       user.set_password(password)
       user.save(using=self._db)
       return user
 
-  def create_superuser(self, email, name, tc, password=None):
+  def create_superuser(self, email, name,  password=None):
     """
     Creates and saves a superuser with the given email, name, tc and password.
     """
@@ -30,16 +30,19 @@ class UserManager(BaseUserManager):
         email,
         password=password,
         name=name,
+
         tc=tc,
         
+
     )
     user.group = "admin"
     user.is_admin = True
     user.is_streamer = True
+    user.group = "admin"
     user.save(using=self._db)
     return user
 
-  def create_streamer(self, email, name, tc, password=None, password2=None):
+  def create_streamer(self, email, name, password=None, password2=None):
       """
       Creates and saves a superuser with the given email, name, tc and password.
       """
@@ -48,12 +51,12 @@ class UserManager(BaseUserManager):
       user = self.model(
           email=self.normalize_email(email),
           name=name,
-          tc=tc,
       )
       user.group = "streamer"
       user.set_password(password)
       user.is_admin = False
       user.is_streamer = True
+      user.group = "streamer"
       user.save(using=self._db)
       return user
 
@@ -66,12 +69,13 @@ class User(AbstractBaseUser):
       unique=True,
   )
   name = models.CharField(max_length=200)
-  tc = models.BooleanField()
+  group = models.CharField(max_length=200 ,default="user")
   is_active = models.BooleanField(default=True)
   is_admin = models.BooleanField(default=False)
   is_streamer = models.BooleanField(default=False)
   created_at = models.DateTimeField(auto_now_add=True)
   updated_at = models.DateTimeField(auto_now=True)
+
   group= models.CharField(max_length=50, default="user")
 
   objects = UserManager()

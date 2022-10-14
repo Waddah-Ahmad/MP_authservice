@@ -27,7 +27,7 @@ SECRET_KEY = os.environ['DJANGO_SECRET_KEY']
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS').split(" ")
 
 
 # Application definition
@@ -57,11 +57,7 @@ MIDDLEWARE = [
 ]
 
 
-CORS_ORIGIN_WHITELIST = [
-    'http://google.com',
-    'http://localhost:3000',
-    'http://127.0.0.1:3000'
-]
+CORS_ORIGIN_WHITELIST = os.environ.get('DJANGO_CORS_ORIGIN_WHITELIST').split(" ")
 
 ROOT_URLCONF = 'djangoauthapi1.urls'
 
@@ -89,12 +85,12 @@ WSGI_APPLICATION = 'djangoauthapi1.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('POSTGRES_NAME'),
-        'USER': os.environ.get('POSTGRES_USER'),
-        'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
-        'HOST': 'db',
-        'PORT': 5432,
+        'ENGINE': os.environ.get('DB_ENGINE'),
+        'NAME': os.environ.get('DB_NAME'),
+        'USER': os.environ.get('DB_USER'),
+        'PASSWORD': os.environ.get('DB_PASSWORD'),
+        'HOST': os.environ.get('DB_HOST'),
+        'PORT': os.environ.get('DB_PORT'),
     }
 }
 
@@ -158,20 +154,21 @@ EMAIL_HOST_USER = os.environ.get('EMAIL_USER')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_PASS')
 EMAIL_USE_TLS = True
 
-
-# JWT Settings
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=20),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
 
     'AUTH_HEADER_TYPES': ('Bearer',),
-    'SIGNING_KEY': os.environ.get('JWT_SECTET_KEY'),
-    'ISSUER' : 'authserveice',
+    
+    'SIGNING_KEY':  os.environ.get('JWT_SIGNING_KEY'),
+    'VERIFYING_KEY': os.environ.get('JWT_VERIFYING_KEY'),
+    # 'SIGNING_KEY': os.environ.get('JWT_SECRET_KEY'),
+    # 'VERIFYING_KEY': os.environ.get('JWT_VERIFYING_KEY'),
+    'ISSUER' : os.environ.get('JWT_ISSUER'),
     'AUTH_HEADER_NAME': 'HTTP_AUTHORIZATION',
     'USER_ID_FIELD': 'id',
     'USER_ID_CLAIM': 'user_id',
     'USER_AUTHENTICATION_RULE': 'rest_framework_simplejwt.authentication.default_user_authentication_rule',
-
     'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
     'TOKEN_TYPE_CLAIM': 'token_type',
     'TOKEN_USER_CLASS': 'rest_framework_simplejwt.models.TokenUser',
@@ -180,9 +177,10 @@ SIMPLE_JWT = {
     #'SIGNING_KEY': open('jwtRS256.key').read(),
     #'VERIFYING_KEY': open('jwtRS256.key.pub').read(),
     
-    'ALGORITHM': 'HS256',
+    'ALGORITHM': 'RS256',
 
 }
+
 
 PASSWORD_RESET_TIMEOUT=900          # 900 Sec = 15 Min
 
