@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
     'account',
 ]
 
@@ -151,6 +152,8 @@ EMAIL_USE_TLS = True
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=20),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ROTATE_REFRESH_TOKENS': False,
+    'BLACKLIST_AFTER_ROTATION': False,
 
     'AUTH_HEADER_TYPES': ('Bearer',),
     'SIGNING_KEY': os.environ.get('JWT_SECTET_KEY'),

@@ -9,6 +9,7 @@ from django.contrib.auth import authenticate
 from account.renderers import UserRenderer
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.tokens import RefreshToken,BlacklistedToken,OutstandingToken,AccessToken
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -26,7 +27,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 def get_tokens_for_user(user):
     refresh = CustomTokenObtainPairSerializer.get_token(user)
     return {
-        # 'refresh': str(refresh),
+        'refresh': str(refresh),
         'access': str(refresh.access_token),
     }
 
@@ -65,7 +66,7 @@ class UserLoginView(APIView):
     user = authenticate(email=email, password=password)
     if user is not None:
       token = get_tokens_for_user(user)
-      return Response({'token': token['access'], 'msg': 'Password '}, status=status.HTTP_200_OK)
+      return Response({'token': token['access'],'refresh':token['refresh'], 'msg': 'Password '}, status=status.HTTP_200_OK)
     else:
       return Response({'errors': {'non_field_errors': ['Email or Password is not Valid']}}, status=status.HTTP_404_NOT_FOUND)
 
@@ -145,3 +146,26 @@ class UserPasswordResetView(APIView):
     serializer = UserPasswordResetSerializer(data=request.data, context={'uid': uid, 'token': token})
     serializer.is_valid(raise_exception=True)
     return Response({'msg': 'Password Reset Successfully'}, status=status.HTTP_200_OK)
+
+# class LogoutView(APIView):
+#     permission_classes = (IsAuthenticated,)
+
+#     def post(self, request):
+#         try:
+#             access_token = request.data["access"]
+#             token = AccessToken(access_token)
+#             token.blacklist()
+
+#             return Response({'msg':'Logged Out Successfully'},status=status.HTTP_205_RESET_CONTENT)
+#         except Exception as e:
+#             return Response({'msg':'Cannot Log Out'},status=status.HTTP_400_BAD_REQUEST)
+
+class LogoutAllView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        tokens = OutstandingToken.objects.filter(user_id=request.user.id)
+        for token in tokens:
+            t, _ = BlacklistedToken.objects.get_or_create(token=token)
+
+        return Response({'msg':'Logged out all'},status=status.HTTP_205_RESET_CONTENT)
