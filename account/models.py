@@ -6,7 +6,7 @@ from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 #  Custom User Manager
 class UserManager(BaseUserManager):
 
-  def create_user(self, email, name, tc , password=None, password2=None):
+  def create_user(self, email, name, password=None, password2=None):
 
       """
       Creates and saves a User with the given email, name and password.
@@ -29,11 +29,7 @@ class UserManager(BaseUserManager):
     user = self.create_user(
         email,
         password=password,
-        name=name,
-
-        tc=tc,
-        
-
+        name=name
     )
     user.group = "admin"
     user.is_admin = True
@@ -81,7 +77,7 @@ class User(AbstractBaseUser):
   objects = UserManager()
 
   USERNAME_FIELD = 'email'
-  REQUIRED_FIELDS = ['name', 'tc' ]
+  REQUIRED_FIELDS = ['name' ]
 
   def __str__(self):
       return self.email

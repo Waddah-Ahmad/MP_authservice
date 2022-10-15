@@ -164,10 +164,10 @@ SIMPLE_JWT = {
 
     'AUTH_HEADER_TYPES': ('Bearer',),
     
-    'SIGNING_KEY':  os.environ.get('JWT_SIGNING_KEY'),
-    'VERIFYING_KEY': os.environ.get('JWT_VERIFYING_KEY'),
-    # 'SIGNING_KEY': os.environ.get('JWT_SECRET_KEY'),
+    # 'SIGNING_KEY':  os.environ.get('JWT_SIGNING_KEY'),
     # 'VERIFYING_KEY': os.environ.get('JWT_VERIFYING_KEY'),
+    'SIGNING_KEY': os.environ.get('JWT_SIGNING_KEY'),
+    'VERIFYING_KEY': os.environ.get('JWT_VERIFYING_KEY'),
     'ISSUER' : os.environ.get('JWT_ISSUER'),
     'AUTH_HEADER_NAME': 'HTTP_AUTHORIZATION',
     'USER_ID_FIELD': 'id',
